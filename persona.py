@@ -1,3 +1,5 @@
+from random import randint
+
 class Persona:
     """
     Clase para representar a una persona
@@ -14,8 +16,9 @@ class Persona:
             coordenada y
         estado : int
             Estado de la persona: 
-            * 0: no infectado
+            * 0: sano
             * 1: infectado
+            * 2: recuperado
         vacuna : boolean
             Estado de vacuna
         """
@@ -23,6 +26,7 @@ class Persona:
         self.y = y
         self.estado = estado
         self.vacuna = vacuna
+        self.dias_enfermo = randint(7, 25) # Duracion enfemerdad entre 7 y 25 dias
 
     def pos_x(self):
         return self.x
@@ -47,3 +51,13 @@ class Persona:
 
     def modificar_vacuna(self, vacuna):
         self.vacuna = vacuna
+
+    def mostrar_persona(self):
+        estados = ["no infectado", "infectado"]
+        print("Estoy en la posicion: (%d, %d)" % (self.x, self.y))
+        print("Mi estado es: %s" % (estados[self.estado]))
+        if self.vacuna:
+            print("Estoy vacunado")
+        else:
+            print("No estoy vacunado")
+        print()
