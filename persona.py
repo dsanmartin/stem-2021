@@ -29,7 +29,7 @@ class Persona:
         self.inoculacion = 0 # Porcentaje de inoculacion de persona
 
     def mostrar_persona(self):
-        estados = ["no infectado", "infectado"]
+        estados = ["no infectado", "infectado", "recuperado"]
         print("Estoy en la posicion: (%d, %d)" % (self.x, self.y))
         print("Mi estado es: %s" % (estados[self.estado]))
         if self.vacuna:

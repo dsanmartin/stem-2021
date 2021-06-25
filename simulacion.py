@@ -220,7 +220,7 @@ class Simulacion:
             coors_x_vac.append(vacuna.x)
             coors_y_vac.append(vacuna.y)
 
-        fig = plt.figure(figsize=(8, 2))
+        fig = plt.figure(figsize=(12, 4))
 
         # Gráfico izquierdo. Personas y vacunas
         ax1 = fig.add_subplot(121)
