@@ -220,12 +220,12 @@ class Simulacion:
             coors_x_vac.append(vacuna.x)
             coors_y_vac.append(vacuna.y)
 
-        fig = plt.figure(figsize=(12, 4))
+        fig = plt.figure(figsize=(8, 2))
 
         # Gráfico izquierdo. Personas y vacunas
         ax1 = fig.add_subplot(121)
-        per_sc = ax1.scatter(coors_x_per, coors_y_per, c=colores, label=colores)
-        vac_sc = ax1.scatter(coors_x_vac, coors_y_vac, c='orange', marker='X')
+        ax1.scatter(coors_x_per, coors_y_per, c=colores, label=colores)
+        ax1.scatter(coors_x_vac, coors_y_vac, c='orange', marker='X')
         ax1.set_xlim([self.x_min, self.x_max])
         ax1.set_ylim([self.y_min, self.y_max])
         

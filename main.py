@@ -10,7 +10,7 @@ def main():
     # Vacunas disponible en el juego
     vacunas = 5
     # Dias de simulacion
-    dias_simulacion = 20
+    dias_simulacion = 30
     # Tamaño del "mundo"
     x_min = 0
     x_max = 20
