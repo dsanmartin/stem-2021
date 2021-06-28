@@ -96,33 +96,45 @@ class Simulacion:
         for persona in self.personas:
             persona.mostrar_persona()
 
-    def mover_personas(self):
+    def mover_personas(self, mov=5):
         """Simulación de movimiento de las personas
+
+        Parámetros
+        ----------
+        mov : int, optional
+            Distancia de movimiento, por default 5
         """
         # Movimiento aleatorio de cada persona
         for persona in self.personas:
             # Movimiento aleatorio 
-            persona.x += randint(-1, 1)
-            persona.y += randint(-1, 1)
+            persona.x += randint(-mov, mov)
+            persona.y += randint(-mov, mov)
 
             # Condiciones periodicas
             persona.x %= self.x_max
             persona.y %= self.y_max
 
-    def mover_vacunas(self):
+
+    def mover_vacunas(self, mov=5):
         """Simulación de movimiento de las vacunas
+
+        Parámetros
+        ----------
+        mov : int, optional
+            Distancia de movimiento, por default 5
         """
         # Movimiento de cada vacuna
         for vacuna in self.vacunas:
             # Movimiento aleatorio 
-            vacuna.x += randint(-1, 1)
-            vacuna.y += randint(-1, 1)
+            vacuna.x += randint(-mov, mov)
+            vacuna.y += randint(-mov, mov)
 
             # Condiciones periodicas
             vacuna.x %= self.x_max
             vacuna.y %= self.y_max
 
-    def revisar_contagio(self, umbral=3.0):
+
+    def revisar_contagio(self, umbral=5.0):
         """Simular el contagio de personas.
 
         Parámetros
@@ -149,7 +161,7 @@ class Simulacion:
                         if uniform(0, 1) <= 1 - self.personas[i].inoculacion:
                             self.personas[i].estado = 1 # Cambio a estado infectado
 
-    def revisar_vacunacion(self, umbral=1.0):
+    def revisar_vacunacion(self, umbral=5.0):
         """Simular el proceso de vacunación.
 
         Parámetros
