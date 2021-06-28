@@ -35,6 +35,9 @@ RADIUS = 5
 # Square width #
 SQUAREWIDTH = 10
 
+# Movement #
+MOV = 5
+
 # def message(msg, color):
 #     mesg = font_style.render(msg, True, color)
 #     dis.blit(mesg, [WIDTH / 6, HEIGHT / 3])
@@ -126,22 +129,25 @@ def main():
     BASICFONT = pygame.font.Font('freesansbold.ttf', 16) # Tipografía
 
     # Personas en la simulacion
-    poblacion = 200
+    poblacion = 100
     # Vacunas disponible en el juego
-    vacunas = 20
+    vacunas = 1
     # Dias de simulacion
-    dias_simulacion = 60
+    dias_simulacion = 300
     # Tamaño del "mundo"
     x_min = 0
     x_max = XMAX - XMIN
     y_min = 0
     y_max = YMAX - YMIN
     # Porcentaje inicial de infectados
-    porcentaje_infectados = 0.25
+    porcentaje_infectados = 0.5
     # Objeto de simulación
     sim = Simulacion(poblacion, vacunas, dias_simulacion, x_min, x_max, y_min, y_max, 
         porc_infectados=porcentaje_infectados)
     d = 0 # Dia de simulacion
+    # Posicion inicial vacuna 
+    sim.vacunas[0].x = x_max // 2
+    sim.vacunas[0].y = y_max // 2
 
     # Loop principal del juego
     while not game_over:
@@ -166,18 +172,22 @@ def main():
                 #clickedButton = getButtonClicked(mousex, mousey)
             elif event.type == KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    print("Left")
+                    sim.vacunas[0].x -= MOV
+                    sim.vacunas[0].x %= sim.x_max
                 elif event.key == pygame.K_RIGHT:
-                    print("Right")
+                    sim.vacunas[0].x += MOV
+                    sim.vacunas[0].x %= sim.x_max
                 elif event.key == pygame.K_UP:
-                    print("Up")
+                    sim.vacunas[0].y += MOV
+                    sim.vacunas[0].y %= sim.y_max
                 elif event.key == pygame.K_DOWN:
-                    print("Down")
+                    sim.vacunas[0].y -= MOV
+                    sim.vacunas[0].y %= sim.y_max
 
         # Etapas de simulacion #
         sim.mover_personas() # Movimiento aleatorio de personas
         sim.revisar_contagio() # Simular el contagio
-        sim.mover_vacunas() # Mover las vacunas
+        #sim.mover_vacunas() # Mover las vacunas
         sim.revisar_vacunacion() # Simular el proceso de vacunación
         sim.estadisticas() # Obtención de estadísticas
         plot(DISPLAYSURF, sim.personas, sim.vacunas) # Dibujar a los agentes
