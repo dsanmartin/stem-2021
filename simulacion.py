@@ -134,7 +134,7 @@ class Simulacion:
             vacuna.y %= self.y_max
 
 
-    def revisar_contagio(self, umbral=5.0):
+    def revisar_contagio(self, umbral=10.0):
         """Simular el contagio de personas.
 
         Parámetros
@@ -161,7 +161,7 @@ class Simulacion:
                         if uniform(0, 1) <= 1 - self.personas[i].inoculacion:
                             self.personas[i].estado = 1 # Cambio a estado infectado
 
-    def revisar_vacunacion(self, umbral=5.0):
+    def revisar_vacunacion(self, umbral=10.0):
         """Simular el proceso de vacunación.
 
         Parámetros

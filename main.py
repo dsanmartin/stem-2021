@@ -38,9 +38,25 @@ SQUAREWIDTH = 10
 # Movement #
 MOV = 5
 
-# def message(msg, color):
-#     mesg = font_style.render(msg, True, color)
-#     dis.blit(mesg, [WIDTH / 6, HEIGHT / 3])
+# Figures #
+VACIMG = pygame.image.load('img/vaccine.png')
+PERIMG = pygame.image.load('img/person.png')
+
+def colorize(image, color):
+    """ Create a "colorized" copy of a surface (replaces RGB values with the given color, preserving the per-pixel alphas of
+    original).
+    image: Surface to create a colorized copy of
+    color: RGB color to use (original alpha values are preserved)
+    return New colorized Surface instance
+    """
+    image = image.copy()
+
+    # zero out RGB values
+    image.fill((0, 0, 0, 255), None, pygame.BLEND_RGBA_MULT)
+    # add in new RGB values
+    image.fill(color[0:3] + (0,), None, pygame.BLEND_RGBA_ADD)
+
+    return image
 
 def terminar():
     pygame.quit()
@@ -70,10 +86,13 @@ def pos(posicion):
     return (XMIN + posicion[0], YMAX - posicion[1])
 
 def dibujar_vacuna(display, posicion):
-    pygame.draw.rect(display, ORANGE, pygame.Rect(posicion[0], posicion[1], SQUAREWIDTH, SQUAREWIDTH))
+    #pygame.draw.rect(display, ORANGE, pygame.Rect(posicion[0], posicion[1], SQUAREWIDTH, SQUAREWIDTH))
+    # color_surface(VACCOL, 255, 0, 0)
+    display.blit(VACIMG, posicion)
 
 def dibujar_persona(display, posicion, color):
-    pygame.draw.circle(display, color, posicion, RADIUS)
+    #pygame.draw.circle(display, color, posicion, RADIUS)
+    display.blit(colorize(PERIMG, color), posicion)
 
 def plot(display, personas, vacunas):
     # Dibujar personas
@@ -133,7 +152,7 @@ def main():
     # Vacunas disponible en el juego
     vacunas = 1
     # Dias de simulacion
-    dias_simulacion = 300
+    dias_simulacion = 100
     # Tamaño del "mundo"
     x_min = 0
     x_max = XMAX - XMIN
@@ -141,9 +160,11 @@ def main():
     y_max = YMAX - YMIN
     # Porcentaje inicial de infectados
     porcentaje_infectados = 0.5
+    # Probabilidad de que una persona se vacune
+    probabilidad_vacuna = 1
     # Objeto de simulación
     sim = Simulacion(poblacion, vacunas, dias_simulacion, x_min, x_max, y_min, y_max, 
-        porc_infectados=porcentaje_infectados)
+        porc_infectados=porcentaje_infectados, prob_vacuna=probabilidad_vacuna)
     d = 0 # Dia de simulacion
     # Posicion inicial vacuna 
     sim.vacunas[0].x = x_max // 2
@@ -165,11 +186,12 @@ def main():
         revisar_final()
 
         # Consultar eventos de pygame (clic o teclas) #
-        for event in pygame.event.get(): # event handling loop
+        for event in pygame.event.get():
+            # Mover vacuna utilizando el mouse
             if event.type == MOUSEBUTTONUP:
                 mousex, mousey = event.pos
-                print(mousex, mousey)
-                #clickedButton = getButtonClicked(mousex, mousey)
+                sim.vacunas[0].x, sim.vacunas[0].y = (mousex - XMIN, YMAX - mousey)
+            # Mover vacuna utilizando el teclado
             elif event.type == KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     sim.vacunas[0].x -= MOV

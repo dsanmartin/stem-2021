@@ -25,7 +25,7 @@ class Persona:
         self.y = y
         self.estado = estado
         self.vacuna = vacuna
-        self.dias_enfermo = randint(7, 25) # Duracion enfemerdad entre 7 y 25 dias
+        self.dias_enfermo = randint(14, 25) # Duracion enfemerdad entre 14 y 25 dias
         self.inoculacion = 0 # Porcentaje de inoculacion de persona
 
     def mostrar_persona(self):
