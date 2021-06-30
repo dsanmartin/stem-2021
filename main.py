@@ -141,7 +141,7 @@ def main():
     # Configuración PyGame #
     pygame.init() 
     FPSCLOCK = pygame.time.Clock() # Reloj del juego
-    DISPLAYSURF = pygame.display.set_mode((ANCHOVENTANA, ALTURAVENTANA)) # Tamaño de ventana
+    DISPLAYSURF = pygame.display.set_mode((0, 0), pygame.FULLSCREEN) #pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT)) # Tamaño de ventana
     pygame.display.set_caption('Videojuégatela por la Inmunidad - STEM 2021') # Título de la ventana
     BASICFONT = pygame.font.Font('freesansbold.ttf', 16) # Tipografía
 
