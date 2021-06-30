@@ -1,62 +1,60 @@
+import sys
 import pygame
 from pygame.locals import *
-import time
-import random
-import sys
 from simulacion import Simulacion
 
-# Game colors #
-BLACK  = (0, 0, 0)
-WHITE  = (255, 255, 255)
-YELLOW = (255, 255, 102)
-RED    = (255, 0, 0)
-GREEN  = (0, 255, 0)
-BLUE   = (0, 0, 255)
-ORANGE = (255, 165, 0)
-CYAN   = (0, 255, 255)
+# Colores utilizados en el juego #
+NEGRO    = (0, 0, 0)
+BLANCO   = (255, 255, 255)
+AMARILLO = (255, 255, 102)
+ROJO     = (255, 0, 0)
+VERDE    = (0, 255, 0)
+AZUL     = (0, 0, 255)
+NARANJO  = (255, 165, 0)
+CYAN     = (0, 255, 255)
 
 # Colores para estados de personas #
-COLORES = [GREEN, RED, BLUE]
+COLORES = [VERDE, ROJO, AZUL]
 
-# Display size
-WINDOWWIDTH  = 650
-WINDOWHEIGHT = 400
+# Tamaño ventana
+ANCHOVENTANA  = 650
+ALTURAVENTANA = 400
 
-# Playable area #
+# Area de juego#
 XMIN, XMAX = 10, 500
 YMIN, YMAX = 10, 380
  
-# Frames per seconds #
+# Frames por segundo #
 FPS = 5
 
-# Circle radius #
-RADIUS = 5
+# Radio de círculo #
+RADIO = 5
 
-# Square width #
-SQUAREWIDTH = 10
+# Ancho cuadrados #
+ANCHOCUADRADO = 10
 
-# Movement #
+# Movimiento de elementos #
 MOV = 5
 
 # Figures #
-VACIMG = pygame.image.load('img/vaccine.png')
-PERIMG = pygame.image.load('img/person.png')
+VACIMG = pygame.image.load('img/vaccine.png') # Vacuna
+PERIMG = pygame.image.load('img/person.png') # Personas
 
-def colorize(image, color):
+def colorize(imagen, color):
     """ Create a "colorized" copy of a surface (replaces RGB values with the given color, preserving the per-pixel alphas of
     original).
     image: Surface to create a colorized copy of
     color: RGB color to use (original alpha values are preserved)
     return New colorized Surface instance
     """
-    image = image.copy()
+    imagen = imagen.copy()
 
     # zero out RGB values
-    image.fill((0, 0, 0, 255), None, pygame.BLEND_RGBA_MULT)
+    imagen.fill((0, 0, 0, 255), None, pygame.BLEND_RGBA_MULT)
     # add in new RGB values
-    image.fill(color[0:3] + (0,), None, pygame.BLEND_RGBA_ADD)
+    imagen.fill(color[0:3] + (0,), None, pygame.BLEND_RGBA_ADD)
 
-    return image
+    return imagen
 
 def terminar():
     pygame.quit()
@@ -71,7 +69,7 @@ def revisar_final():
         pygame.event.post(event) # put the other KEYUP event objects back
 
 def pos(posicion):
-    """Plano cartesiano a coordenadas de pygame.
+    """Coordenadas de plano cartesiano a coordenadas de pygame.
 
     Parámetros
     ----------
@@ -86,12 +84,12 @@ def pos(posicion):
     return (XMIN + posicion[0], YMAX - posicion[1])
 
 def dibujar_vacuna(display, posicion):
-    #pygame.draw.rect(display, ORANGE, pygame.Rect(posicion[0], posicion[1], SQUAREWIDTH, SQUAREWIDTH))
+    #pygame.draw.rect(display, NARANJO, pygame.Rect(posicion[0], posicion[1], ANCHOCUADRADO, ANCHOCUADRADO))
     # color_surface(VACCOL, 255, 0, 0)
     display.blit(VACIMG, posicion)
 
 def dibujar_persona(display, posicion, color):
-    #pygame.draw.circle(display, color, posicion, RADIUS)
+    #pygame.draw.circle(display, color, posicion, RADIO)
     display.blit(colorize(PERIMG, color), posicion)
 
 def plot(display, personas, vacunas):
@@ -109,16 +107,16 @@ def counter(display, sim):
     font_1 = pygame.font.SysFont("Arial", 11, bold=True)
     font_2 = pygame.font.SysFont("Arial", 12)
     # Marco
-    pygame.draw.rect(display, BLACK, pygame.Rect(XMAX + 25, YMIN , 120, 100), width=1)
+    pygame.draw.rect(display, NEGRO, pygame.Rect(XMAX + 25, YMIN , 120, 100), width=1)
     # Titulo
-    titulo = font_1.render("CONTADOR", 1, BLACK)
+    titulo = font_1.render("CONTADOR", 1, NEGRO)
     display.blit(titulo, (XMAX + 27, YMIN))
     # Etiquetas personas
     # Colores
-    pygame.draw.circle(display, GREEN, (XMAX + 35, YMIN + 22), RADIUS) # Sano
-    pygame.draw.circle(display, RED, (XMAX + 35, YMIN + 42), RADIUS) # Infectado
-    pygame.draw.circle(display, BLUE, (XMAX + 35, YMIN + 62), RADIUS) # Recuperado
-    pygame.draw.circle(display, CYAN, (XMAX + 35, YMIN + 82), RADIUS) # Vacunado
+    pygame.draw.circle(display, VERDE, (XMAX + 35, YMIN + 22), RADIO) # Sano
+    pygame.draw.circle(display, ROJO, (XMAX + 35, YMIN + 42), RADIO) # Infectado
+    pygame.draw.circle(display, AZUL, (XMAX + 35, YMIN + 62), RADIO) # Recuperado
+    pygame.draw.circle(display, CYAN, (XMAX + 35, YMIN + 82), RADIO) # Vacunado
     #
     n_sanos = sim.sanos[-1] if len(sim.sanos) > 0 else 0
     n_infec = sim.infectados[-1] if len(sim.infectados) > 0 else 0
@@ -126,13 +124,13 @@ def counter(display, sim):
     n_vacun = sim.inoculados[-1] if len(sim.inoculados) > 0 else 0
 
     # Texto
-    label = font_2.render("Sanos " + str(n_sanos), 1, BLACK)
+    label = font_2.render("Sanos " + str(n_sanos), 1, NEGRO)
     display.blit(label, (XMAX + 42, YMIN + 16))
-    label = font_2.render("Infectados " + str(n_infec), 1, BLACK)
+    label = font_2.render("Infectados " + str(n_infec), 1, NEGRO)
     display.blit(label, (XMAX + 42, YMIN + 36))
-    label = font_2.render("Recuperados " + str(n_recup), 1, BLACK)
+    label = font_2.render("Recuperados " + str(n_recup), 1, NEGRO)
     display.blit(label, (XMAX + 42, YMIN + 56))
-    label = font_2.render("Vacunados " + str(n_vacun), 1, BLACK)
+    label = font_2.render("Vacunados " + str(n_vacun), 1, NEGRO)
     display.blit(label, (XMAX + 42, YMIN + 76))
 
 
@@ -143,7 +141,7 @@ def main():
     # Configuración PyGame #
     pygame.init() 
     FPSCLOCK = pygame.time.Clock() # Reloj del juego
-    DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT)) # Tamaño de ventana
+    DISPLAYSURF = pygame.display.set_mode((ANCHOVENTANA, ALTURAVENTANA)) # Tamaño de ventana
     pygame.display.set_caption('Videojuégatela por la Inmunidad - STEM 2021') # Título de la ventana
     BASICFONT = pygame.font.Font('freesansbold.ttf', 16) # Tipografía
 
@@ -174,10 +172,10 @@ def main():
     while not game_over:
 
         # Pantalla blanca
-        DISPLAYSURF.fill(WHITE)
+        DISPLAYSURF.fill(BLANCO)
 
         # Marco
-        pygame.draw.rect(DISPLAYSURF, BLACK, pygame.Rect(XMIN, YMIN, XMAX, YMAX), width=2)
+        pygame.draw.rect(DISPLAYSURF, NEGRO, pygame.Rect(XMIN, YMIN, XMAX, YMAX), width=2)
 
         # Contador estadísticas
         counter(DISPLAYSURF, sim)

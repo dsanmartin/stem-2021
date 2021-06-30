@@ -1,4 +1,3 @@
-from math import inf
 from persona import Persona
 from vacuna import Vacuna
 from random import randint, uniform
@@ -140,7 +139,7 @@ class Simulacion:
         Parámetros
         ----------
         umbral : double, opcional
-            Distancia umbral para contagio, por default 3.0
+            Distancia umbral para contagio, por default 10.0
         """
         for i in range(self.poblacion):
             for j in range(self.poblacion):
