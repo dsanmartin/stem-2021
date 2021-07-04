@@ -36,9 +36,9 @@ class Simulacion:
         y_max : int
             Frontera superior del dominio
         porc_infectados : float, opcional
-            Porcentaje inicial de infectads, por default 0.1
+            Porcentaje inicial de infectads, por omisión 0.1
         prob_vacuna : float, opcional
-            Probabilidad de que una persona se vacune, by default 0.5
+            Probabilidad de que una persona se vacune, por omisión 0.5
         """
         self.poblacion = poblacion
         self.dias_simulacion = dias_simulacion
@@ -95,38 +95,87 @@ class Simulacion:
         for persona in self.personas:
             persona.mostrar_persona()
 
-    def mover_personas(self, mov=5):
+    def revisar_colision(self, x, y, umbral=6.0):
+        """Revisar si existen colisiones entre las personas y la posición (x, y).
+
+        Parámetros
+        ----------
+        x : int
+            Coordenada x
+        y : int
+            Coordenada y
+        umbral : float, opcional
+            Umbral para revisar la colisión, por omisión 3.0
+
+        Retorna
+        -------
+        boolean
+            Devuelve verdadero si existen colisiones y falso en caso contrario
+        """
+        for persona in self.personas:
+            if distancia(x, y, persona.x, persona.y) <= umbral:
+                return True
+        return False
+
+    def mover_personas(self, vel=5):
         """Simulación de movimiento de las personas
 
         Parámetros
         ----------
         mov : int, optional
-            Distancia de movimiento, por default 5
+            Distancia de movimiento, por omisión 5
         """
         # Movimiento aleatorio de cada persona
-        for persona in self.personas:
-            # Movimiento aleatorio 
-            persona.x += randint(-mov, mov)
-            persona.y += randint(-mov, mov)
+        # for persona in self.personas:
+        #     # Movimiento aleatorio 
+        #     persona.x += randint(-vel, vel)
+        #     persona.y += randint(-vel, vel)
 
-            # Condiciones periodicas
-            persona.x %= self.x_max
-            persona.y %= self.y_max
+        #     # Condiciones periodicas
+        #     persona.x %= self.x_max
+        #     persona.y %= self.y_max
+
+        # Este while permite que el programa principal espere que la función se termine de ejecutar
+        while True:
+            for persona in self.personas:
+                # Bandera para verificar que cada persona asegure una posicion nueva sin colisión
+                flag = True
+                # Se genera un movimiento aleatorio siempre y cuando no exista colisión
+                while flag: 
+                    # Movimiento aleatorio 
+                    tmp_x = persona.x + randint(-vel, vel)
+                    tmp_y = persona.y + randint(-vel, vel)
+
+                    # Condiciones periodicas
+                    tmp_x %= self.x_max
+                    tmp_y %= self.y_max
+
+                    # Verificar si existe colisión con la nueva posición, 
+                    # en caso contrario volver a generar una nueva
+                    if not self.revisar_colision(tmp_x, tmp_y):
+                        flag = False
+                        persona.x = tmp_x
+                        persona.y = tmp_y
+            
+            # Se cierra el ciclo para seguir la ejecución del programa principal
+            break 
+
+        #return True
 
 
-    def mover_vacunas(self, mov=5):
+    def mover_vacunas(self, vel=5):
         """Simulación de movimiento de las vacunas
 
         Parámetros
         ----------
         mov : int, optional
-            Distancia de movimiento, por default 5
+            Distancia de movimiento, por omisión 5
         """
         # Movimiento de cada vacuna
         for vacuna in self.vacunas:
             # Movimiento aleatorio 
-            vacuna.x += randint(-mov, mov)
-            vacuna.y += randint(-mov, mov)
+            vacuna.x += randint(-vel, vel)
+            vacuna.y += randint(-vel, vel)
 
             # Condiciones periodicas
             vacuna.x %= self.x_max
@@ -139,7 +188,7 @@ class Simulacion:
         Parámetros
         ----------
         umbral : double, opcional
-            Distancia umbral para contagio, por default 10.0
+            Distancia umbral para contagio, por omisión 10.0
         """
         for i in range(self.poblacion):
             for j in range(self.poblacion):
@@ -166,7 +215,7 @@ class Simulacion:
         Parámetros
         ----------
         umbral : double, optional
-            Distancia umbral para vacunación, por default 1.0
+            Distancia umbral para vacunación, por omisión 1.0
         """
         for persona in self.personas:
             for vacuna in self.vacunas:

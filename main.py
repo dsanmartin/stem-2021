@@ -16,13 +16,20 @@ CYAN     = (0, 255, 255)
 # Colores para estados de personas #
 COLORES = [VERDE, ROJO, AZUL]
 
+# Pixeles pasto
+PIX = 42
+
 # Tamaño ventana
 ANCHOVENTANA  = 650
 ALTURAVENTANA = 400
 
 # Area de juego#
-XMIN, XMAX = 10, 500
-YMIN, YMAX = 10, 380
+XMIN = 10
+XMAX = PIX * 11 + XMIN
+YMIN = 10
+YMAX = PIX * 10 + YMIN
+ANCHO = XMAX - XMIN
+ALTO = YMAX - YMIN
  
 # Frames por segundo #
 FPS = 5
@@ -33,12 +40,10 @@ RADIO = 5
 # Ancho cuadrados #
 ANCHOCUADRADO = 10
 
-# Movimiento de elementos #
-MOV = 5
-
 # Figures #
 VACIMG = pygame.image.load('img/vaccine.png') # Vacuna
 PERIMG = pygame.image.load('img/person.png') # Personas
+PASTO = pygame.image.load('img/grass.jpg')
 
 def colorize(imagen, color):
     """ Create a "colorized" copy of a surface (replaces RGB values with the given color, preserving the per-pixel alphas of
@@ -68,7 +73,7 @@ def revisar_final():
             terminar() # terminate if the KEYUP event was for the Esc key
         pygame.event.post(event) # put the other KEYUP event objects back
 
-def pos(posicion):
+def pos(x, y):
     """Coordenadas de plano cartesiano a coordenadas de pygame.
 
     Parámetros
@@ -81,7 +86,7 @@ def pos(posicion):
     tuple
         Retorna la posición en coordenadas de pygame
     """
-    return (XMIN + posicion[0], YMAX - posicion[1])
+    return (XMIN + x, YMAX - y)
 
 def dibujar_vacuna(display, posicion):
     #pygame.draw.rect(display, NARANJO, pygame.Rect(posicion[0], posicion[1], ANCHOCUADRADO, ANCHOCUADRADO))
@@ -92,16 +97,35 @@ def dibujar_persona(display, posicion, color):
     #pygame.draw.circle(display, color, posicion, RADIO)
     display.blit(colorize(PERIMG, color), posicion)
 
+def dibujar_pasto(display):
+    fil = ALTO // PIX
+    col = ANCHO // PIX
+    # #pasto = PASTO.convert()
+    # #pasto = pasto.set_alpha(128)
+    # pasto = PASTO.copy()
+    # # this works on images with per pixel alpha too
+    # alpha = 250
+    # pasto.fill((255, 255, 255, alpha), None, pygame.BLEND_RGBA_MULT)
+    posy = 0
+    for i in range(fil):
+        posx = 0
+        for j in range(col):
+            display.blit(PASTO, (posx + XMIN, posy + YMIN))
+            posx += PIX
+        posy += PIX
+
+
+
 def plot(display, personas, vacunas):
     # Dibujar personas
     for persona in personas:
         if persona.inoculacion > 0 and persona.estado != 1:
-            dibujar_persona(display, pos((persona.x, persona.y)), CYAN)
+            dibujar_persona(display, pos(persona.x, persona.y), CYAN)
         else:
-            dibujar_persona(display, pos((persona.x, persona.y)), COLORES[persona.estado])
+            dibujar_persona(display, pos(persona.x, persona.y), COLORES[persona.estado])
     # Dibujar vacunas
     for vacuna in vacunas:
-        dibujar_vacuna(display, pos((vacuna.x, vacuna.y)))
+        dibujar_vacuna(display, pos(vacuna.x, vacuna.y))
 
 def counter(display, sim):
     font_1 = pygame.font.SysFont("Arial", 11, bold=True)
@@ -135,17 +159,19 @@ def counter(display, sim):
 
 
 def main():
-    global FPSCLOCK, DISPLAYSURF, BASICFONT
+    global FPSCLOCK, DISPLAY, BASICFONT
     game_over = False
 
     # Configuración PyGame #
     pygame.init() 
     FPSCLOCK = pygame.time.Clock() # Reloj del juego
-    DISPLAYSURF = pygame.display.set_mode((0, 0), pygame.FULLSCREEN) #pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT)) # Tamaño de ventana
-    pygame.display.set_caption('Videojuégatela por la Inmunidad - STEM 2021') # Título de la ventana
+    DISPLAY = pygame.display.set_mode((0, 0), pygame.FULLSCREEN) #pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT)) # Tamaño de ventana
     BASICFONT = pygame.font.Font('freesansbold.ttf', 16) # Tipografía
+    pygame.display.set_caption('Videojuégatela por la Inmunidad - STEM 2021') # Título de la ventana
 
     # Personas en la simulacion
+    # El algoritmo de colisiones depende de la cantidad de personas. 
+    # No debería utilizar más de 100, lo ideal es un valor menor.
     poblacion = 100
     # Vacunas disponible en el juego
     vacunas = 1
@@ -153,17 +179,22 @@ def main():
     dias_simulacion = 100
     # Tamaño del "mundo"
     x_min = 0
-    x_max = XMAX - XMIN
+    x_max = ANCHO
     y_min = 0
-    y_max = YMAX - YMIN
+    y_max = ALTO
     # Porcentaje inicial de infectados
     porcentaje_infectados = 0.5
     # Probabilidad de que una persona se vacune
     probabilidad_vacuna = 1
+    # Velocidad de movimiento personas (pixeles / tick)
+    vel_per = 5
+    # Velocidad de movimiento vacunas (pixeles / tick)
+    vel_vac = 5
     # Objeto de simulación
     sim = Simulacion(poblacion, vacunas, dias_simulacion, x_min, x_max, y_min, y_max, 
         porc_infectados=porcentaje_infectados, prob_vacuna=probabilidad_vacuna)
-    d = 0 # Dia de simulacion
+    # Dia de simulacion
+    d = 0 
     # Posicion inicial vacuna 
     sim.vacunas[0].x = x_max // 2
     sim.vacunas[0].y = y_max // 2
@@ -172,13 +203,16 @@ def main():
     while not game_over:
 
         # Pantalla blanca
-        DISPLAYSURF.fill(BLANCO)
+        DISPLAY.fill(BLANCO)
+
+        # Dibujar el fondo con pasto
+        dibujar_pasto(DISPLAY)
 
         # Marco
-        pygame.draw.rect(DISPLAYSURF, NEGRO, pygame.Rect(XMIN, YMIN, XMAX, YMAX), width=2)
+        #pygame.draw.rect(DISPLAY, NEGRO, pygame.Rect(XMIN, YMIN, XMAX, YMAX), width=2)
 
         # Contador estadísticas
-        counter(DISPLAYSURF, sim)
+        counter(DISPLAY, sim)
 
         # Revisar si se cierra el juego #
         revisar_final()
@@ -192,32 +226,38 @@ def main():
             # Mover vacuna utilizando el teclado
             elif event.type == KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    sim.vacunas[0].x -= MOV
+                    sim.vacunas[0].x -= vel_vac
                     sim.vacunas[0].x %= sim.x_max
                 elif event.key == pygame.K_RIGHT:
-                    sim.vacunas[0].x += MOV
+                    sim.vacunas[0].x += vel_vac
                     sim.vacunas[0].x %= sim.x_max
                 elif event.key == pygame.K_UP:
-                    sim.vacunas[0].y += MOV
+                    sim.vacunas[0].y += vel_vac
                     sim.vacunas[0].y %= sim.y_max
                 elif event.key == pygame.K_DOWN:
-                    sim.vacunas[0].y -= MOV
+                    sim.vacunas[0].y -= vel_vac
                     sim.vacunas[0].y %= sim.y_max
 
         # Etapas de simulacion #
-        sim.mover_personas() # Movimiento aleatorio de personas
+        sim.mover_personas(vel_per) # Movimiento aleatorio de personas
+        # Esperar por la revisión de colisiones
+        # flag = True
+        # while flag:
+        #     if sim.mover_personas(vel_per):
+        #         flag = False
         sim.revisar_contagio() # Simular el contagio
         #sim.mover_vacunas() # Mover las vacunas
         sim.revisar_vacunacion() # Simular el proceso de vacunación
         sim.estadisticas() # Obtención de estadísticas
-        plot(DISPLAYSURF, sim.personas, sim.vacunas) # Dibujar a los agentes
+        plot(DISPLAY, sim.personas, sim.vacunas) # Dibujar a los agentes
         d += 1 # Siguiente dia de simulación
+
         # Detener la simulación cuando se alcancel los días definidos o ya estén todos recuperados
         if d == sim.dias_simulacion or sim.recuperados[-1] == sim.poblacion: 
             game_over = True
-        
+
         # Actualizacion de pantalla #
-        pygame.display.update() # Actualización de pantalla
+        pygame.display.update() 
         FPSCLOCK.tick(FPS) 
 
 # Función principal #
