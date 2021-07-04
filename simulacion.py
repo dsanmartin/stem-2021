@@ -95,7 +95,7 @@ class Simulacion:
         for persona in self.personas:
             persona.mostrar_persona()
 
-    def revisar_colision(self, x, y, umbral=6.0):
+    def revisar_colision(self, x, y, umbral):
         """Revisar si existen colisiones entre las personas y la posición (x, y).
 
         Parámetros
@@ -104,8 +104,8 @@ class Simulacion:
             Coordenada x
         y : int
             Coordenada y
-        umbral : float, opcional
-            Umbral para revisar la colisión, por omisión 3.0
+        umbral : float
+            Umbral para revisar la colisión
 
         Retorna
         -------
@@ -117,7 +117,7 @@ class Simulacion:
                 return True
         return False
 
-    def mover_personas(self, vel=5):
+    def mover_personas(self, vel=5, umbral=5):
         """Simulación de movimiento de las personas
 
         Parámetros
@@ -152,7 +152,7 @@ class Simulacion:
 
                     # Verificar si existe colisión con la nueva posición, 
                     # en caso contrario volver a generar una nueva
-                    if not self.revisar_colision(tmp_x, tmp_y):
+                    if not self.revisar_colision(tmp_x, tmp_y, umbral):
                         flag = False
                         persona.x = tmp_x
                         persona.y = tmp_y

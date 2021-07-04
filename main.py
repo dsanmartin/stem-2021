@@ -16,18 +16,20 @@ CYAN     = (0, 255, 255)
 # Colores para estados de personas #
 COLORES = [VERDE, ROJO, AZUL]
 
-# Pixeles pasto
-PIX = 42
+# Información fondo del juego
+PIX = 32 # Pixeles baldosas
+N_BALD_X = 25 # Número baldosas eje x
+N_BALD_Y = 15 # Número baldosas eje y
 
 # Tamaño ventana
 ANCHOVENTANA  = 650
 ALTURAVENTANA = 400
 
 # Area de juego#
-XMIN = 10
-XMAX = PIX * 11 + XMIN
-YMIN = 10
-YMAX = PIX * 10 + YMIN
+XMIN = 20
+XMAX = PIX * N_BALD_X + XMIN
+YMIN = 20
+YMAX = PIX * N_BALD_Y + YMIN
 ANCHO = XMAX - XMIN
 ALTO = YMAX - YMIN
  
@@ -40,10 +42,11 @@ RADIO = 5
 # Ancho cuadrados #
 ANCHOCUADRADO = 10
 
-# Figures #
+# Imágenes #
 VACIMG = pygame.image.load('img/vaccine.png') # Vacuna
 PERIMG = pygame.image.load('img/person.png') # Personas
-PASTO = pygame.image.load('img/grass.jpg')
+PASTO = pygame.image.load('img/grass.jpg') # Pasto
+BALDO = pygame.image.load('img/tile.png') # Baldosas
 
 def colorize(imagen, color):
     """ Create a "colorized" copy of a surface (replaces RGB values with the given color, preserving the per-pixel alphas of
@@ -97,24 +100,16 @@ def dibujar_persona(display, posicion, color):
     #pygame.draw.circle(display, color, posicion, RADIO)
     display.blit(colorize(PERIMG, color), posicion)
 
-def dibujar_pasto(display):
-    fil = ALTO // PIX
-    col = ANCHO // PIX
-    # #pasto = PASTO.convert()
-    # #pasto = pasto.set_alpha(128)
-    # pasto = PASTO.copy()
-    # # this works on images with per pixel alpha too
-    # alpha = 250
-    # pasto.fill((255, 255, 255, alpha), None, pygame.BLEND_RGBA_MULT)
+def dibujar_baldosas(display):
+    fil = ALTO // PIX # Número de filas
+    col = ANCHO // PIX # Número de columnas
     posy = 0
     for i in range(fil):
         posx = 0
         for j in range(col):
-            display.blit(PASTO, (posx + XMIN, posy + YMIN))
+            display.blit(BALDO, (posx + XMIN, posy + YMIN))
             posx += PIX
         posy += PIX
-
-
 
 def plot(display, personas, vacunas):
     # Dibujar personas
@@ -177,19 +172,23 @@ def main():
     vacunas = 1
     # Dias de simulacion
     dias_simulacion = 100
-    # Tamaño del "mundo"
+    # Tamaño del "mundo" en plano cartesiano
     x_min = 0
-    x_max = ANCHO
+    x_max = ANCHO - 12 # Ancho del juego - corrección tamaño de persona
     y_min = 0
-    y_max = ALTO
+    y_max = ALTO - 5
     # Porcentaje inicial de infectados
     porcentaje_infectados = 0.5
     # Probabilidad de que una persona se vacune
     probabilidad_vacuna = 1
     # Velocidad de movimiento personas (pixeles / tick)
-    vel_per = 5
+    vel_per = 10
     # Velocidad de movimiento vacunas (pixeles / tick)
-    vel_vac = 5
+    vel_vac = 10
+    # Umbral colision
+    umb_col = vel_per + 1
+    # Umbral contagio
+    umb_con = 10.0
     # Objeto de simulación
     sim = Simulacion(poblacion, vacunas, dias_simulacion, x_min, x_max, y_min, y_max, 
         porc_infectados=porcentaje_infectados, prob_vacuna=probabilidad_vacuna)
@@ -206,7 +205,7 @@ def main():
         DISPLAY.fill(BLANCO)
 
         # Dibujar el fondo con pasto
-        dibujar_pasto(DISPLAY)
+        dibujar_baldosas(DISPLAY)
 
         # Marco
         #pygame.draw.rect(DISPLAY, NEGRO, pygame.Rect(XMIN, YMIN, XMAX, YMAX), width=2)
@@ -239,13 +238,13 @@ def main():
                     sim.vacunas[0].y %= sim.y_max
 
         # Etapas de simulacion #
-        sim.mover_personas(vel_per) # Movimiento aleatorio de personas
+        sim.mover_personas(vel_per, umb_col) # Movimiento aleatorio de personas
         # Esperar por la revisión de colisiones
         # flag = True
         # while flag:
         #     if sim.mover_personas(vel_per):
         #         flag = False
-        sim.revisar_contagio() # Simular el contagio
+        sim.revisar_contagio(umb_con) # Simular el contagio
         #sim.mover_vacunas() # Mover las vacunas
         sim.revisar_vacunacion() # Simular el proceso de vacunación
         sim.estadisticas() # Obtención de estadísticas
