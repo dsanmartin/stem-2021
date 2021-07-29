@@ -60,8 +60,7 @@ def colorear(imagen, color):
 
 
 def revisar_final():
-    """Revisa si el juego se cierra.
-    """
+    """Revisa si el juego se cierra."""
     for event in pygame.event.get(QUIT): # Obtener todos los eventos de tipo QUIT (cerrar)
         pygame.quit()
         sys.exit()
@@ -156,7 +155,7 @@ def plot(display, personas, vacunas):
         dibujar_vacuna(display, pos(vacuna.x, vacuna.y))
 
 def contador(display, sim, d):
-    """Generar el contador con estadísticas
+    """Generar el contador con estadísticas y mensajes del juego
 
     Parámetros
     ----------
@@ -196,6 +195,15 @@ def contador(display, sim, d):
     label = font_2.render("Día: " + str(d / 2), 1, NEGRO)
     display.blit(label, (XMAX + 42, YMIN + 100))
 
+def final(display, motivo):
+    font = pygame.font.SysFont("Arial", 11, bold=True)
+    if motivo == 1:
+        mensaje = "INMUNIDAD ALCANZADA"
+    else:
+        mensaje = "SIMULACIÓN TERMINADA"
+    label = font.render(mensaje, 1, NEGRO)
+    display.blit(label, (XMAX + 20, YMIN + 130))
+
 # Función principal #
 def main():
     global FPSCLOCK, DISPLAY, BASICFONT # Variables de PyGame
@@ -220,7 +228,7 @@ def main():
     y_min = 0
     y_max = ALTO - 5
     # Porcentaje inicial de infectados
-    porcentaje_infectados = 0.25
+    porcentaje_infectados = 0.05
     # Probabilidad de que una persona se vacune
     probabilidad_vacuna = 1
     # Probabilidad de rebrote
@@ -234,7 +242,7 @@ def main():
     # Umbral contagio
     umb_con = vel_per + 5
     # Umbral vacuna
-    umb_vac = vel_vac + 5
+    umb_vac = vel_vac + 20
     # Objeto de simulación
     sim = Simulacion(poblacion, vacunas, dias_simulacion, x_min, x_max, y_min, y_max, 
         porc_infectados=porcentaje_infectados, prob_vacuna=probabilidad_vacuna, prob_reb=probabilidad_rebrote)
@@ -283,17 +291,20 @@ def main():
                     sim.vacunas[0].y -= vel_vac # Mover vacuna abajo
                     sim.vacunas[0].y %= sim.y_max # Restringir la posición a los límites del mundo
 
-        # Etapas de simulación #
-        sim.mover_personas(vel_per, umb_col) # Movimiento aleatorio de personas
-        sim.revisar_contagio(umb_con) # Simular el contagio
-        sim.revisar_vacunacion(umb_vac) # Simular el proceso de vacunación
-        sim.estadisticas() # Obtención de estadísticas
-        plot(DISPLAY, sim.personas, sim.vacunas) # Dibujar a los agentes
-        d += 1 # Siguientes 12 horas de simulación
+        if d < sim.dias_simulacion: # Verificar dias de simulación
+            # Etapas de simulación #
+            sim.mover_personas(vel_per, umb_col) # Movimiento aleatorio de personas
+            sim.revisar_contagio(umb_con) # Simular el contagio
+            sim.revisar_vacunacion(umb_vac) # Simular el proceso de vacunación
+            sim.estadisticas() # Obtención de estadísticas
+            #plot(DISPLAY, sim.personas, sim.vacunas) # Dibujar a los agentes
+            d += 1 # Siguientes 12 horas de simulación
+        elif sim.sanos == 0 and sim.infectados == 0: # Detener simulación cuando no queden sanos ni infectados
+            final(DISPLAY, 1)
+        else: # Detener la simulación cuando se alcancen los días definidos
+            final(DISPLAY, 2)
 
-        # Detener la simulación cuando se alcancen los días definidos o ya estén todos recuperados
-        if d == sim.dias_simulacion or sim.recuperados[-1] == sim.poblacion: 
-            game_over = True
+        plot(DISPLAY, sim.personas, sim.vacunas) # Dibujar a los agentes
 
         # Actualizacion de pantalla #
         pygame.display.update() 
