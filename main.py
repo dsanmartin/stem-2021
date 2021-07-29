@@ -194,6 +194,20 @@ def contador(display, sim, d):
     label = font_2.render("Día: " + str(d / 2), 1, NEGRO)
     display.blit(label, (XMAX + 42, YMIN + 100))
 
+# Políticas de vacunación #
+def politica_vacunacion(vacuna, angulo, velocidad):
+    if angulo == 0:
+        vacuna.x += velocidad # Mover vacuna a la derecha
+        vacuna.x %= XMAX # Restringir la posición a los límites del mundo
+    elif angulo == 90:
+        vacuna.y += velocidad
+        vacuna.y %= YMAX
+    elif angulo == 45:
+        vacuna.x += velocidad
+        vacuna.x %= XMAX
+        vacuna.y += velocidad
+        vacuna.y %= YMAX
+
 # Función principal #
 def main():
     global FPSCLOCK, DISPLAY, BASICFONT # Variables de PyGame
@@ -255,27 +269,8 @@ def main():
         # Revisar si se cierra el juego #
         revisar_final()
 
-        # Consultar eventos de pygame (clic o teclas) #
-        for event in pygame.event.get():
-            # Mover la vacuna utilizando el mouse
-            if event.type == MOUSEBUTTONUP:
-                mousex, mousey = event.pos
-                sim.vacunas[0].x = mousex - XMIN
-                sim.vacunas[0].y = YMAX - mousey
-            # Mover vacuna utilizando el teclado
-            elif event.type == KEYDOWN:
-                if event.key == pygame.K_LEFT: # Tecla izquierda
-                    sim.vacunas[0].x -= vel_vac # Mover vacuna a la izquierda
-                    sim.vacunas[0].x %= sim.x_max # Restringir la posición a los límites del mundo
-                elif event.key == pygame.K_RIGHT: # Tecla derecha
-                    sim.vacunas[0].x += vel_vac # Mover vacuna a la derecha
-                    sim.vacunas[0].x %= sim.x_max # Restringir la posición a los límites del mundo
-                elif event.key == pygame.K_UP: # Tecla arriba
-                    sim.vacunas[0].y += vel_vac # Mover vacuna arriba
-                    sim.vacunas[0].y %= sim.y_max # Restringir la posición a los límites del mundo
-                elif event.key == pygame.K_DOWN: # Tecla abajo
-                    sim.vacunas[0].y -= vel_vac # Mover vacuna abajo
-                    sim.vacunas[0].y %= sim.y_max # Restringir la posición a los límites del mundo
+        # Política de vacunación #
+        politica_vacunacion(sim.vacunas[0], 90, vel_vac)
 
         # Etapas de simulación #
         sim.mover_personas(vel_per, umb_col) # Movimiento aleatorio de personas
