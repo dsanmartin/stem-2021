@@ -33,11 +33,11 @@ class Simulacion:
         y_max : int
             Frontera superior del dominio
         porc_infectados : float, opcional
-            Porcentaje inicial de infectads, por omisión 0.1
+            Porcentaje inicial de infectads, por omisión 10%
         prob_vacuna : float, opcional
-            Probabilidad de que una persona se vacune, por omisión 0.5
+            Probabilidad de que una persona se vacune, por omisión 50%
         prob_reb : float, opcional
-            Probabilidad de rebrote, por omisión 0.5
+            Probabilidad de rebrote, por omisión 50%
         """
         self.poblacion = poblacion
         self.dias_simulacion = dias_simulacion
@@ -150,9 +150,6 @@ class Simulacion:
             # Se cierra el ciclo para seguir la ejecución del programa principal
             break 
 
-        #return True
-
-
     def mover_vacunas(self, vel=5):
         """Simulación de movimiento de las vacunas
 
@@ -205,7 +202,7 @@ class Simulacion:
         Parámetros
         ----------
         umbral : double, optional
-            Distancia umbral para vacunación, por omisión 1.0
+            Distancia umbral para vacunación, por omisión 10.0
         """
         for persona in self.personas:
             for vacuna in self.vacunas:
@@ -227,7 +224,7 @@ class Simulacion:
             Porcentaje de rebrote, por omisión 5%
         """
         for persona in self.personas: # Iterar sobre personas
-            # Revisar probabilidad de rebrote y la persona es sana
+            # Revisar probabilidad de rebrote y si la persona es sana
             if uniform(0, 1) <= porc and persona.estado == 0: 
                 persona.estado = 1 # Infectado
                 persona.dias_enfermo = randint(28, 50) # Nuevos días enfermo

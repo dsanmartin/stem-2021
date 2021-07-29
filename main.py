@@ -2,6 +2,7 @@ import sys
 import pygame
 from pygame.locals import *
 from simulacion import Simulacion
+from math import cos, sin, pi
 
 # Colores utilizados en el juego #
 NEGRO    = (0, 0, 0)
@@ -19,7 +20,7 @@ PIX = 32 # Pixeles baldosas
 N_BALD_X = 25 # Número baldosas eje x
 N_BALD_Y = 15 # Número baldosas eje y
 
-# Area de juego #
+# Área de juego #
 XMIN = 20 
 XMAX = PIX * N_BALD_X + XMIN
 YMIN = 20
@@ -60,8 +61,7 @@ def colorear(imagen, color):
 
 
 def revisar_final():
-    """Revisa si el juego se cierra.
-    """
+    """Revisa si el juego se cierra"""
     for event in pygame.event.get(QUIT): # Obtener todos los eventos de tipo QUIT (cerrar)
         pygame.quit()
         sys.exit()
@@ -125,6 +125,7 @@ def dibujar_baldosas(display):
     fil = ALTO // PIX + 1 # Número de filas
     col = ANCHO // PIX # Número de columnas
     posy = 0
+    # Dibujar las baldosas en el área de juego
     for i in range(fil):
         posx = 0
         for j in range(col):
@@ -191,22 +192,32 @@ def contador(display, sim, d):
     display.blit(label, (XMAX + 42, YMIN + 56))
     label = font_2.render("Vacunados " + str(n_vacun), 1, NEGRO)
     display.blit(label, (XMAX + 42, YMIN + 76))
+    # Días de simulación
     label = font_2.render("Día: " + str(d / 2), 1, NEGRO)
     display.blit(label, (XMAX + 42, YMIN + 100))
 
 # Políticas de vacunación #
 def politica_vacunacion(vacuna, angulo, velocidad):
-    if angulo == 0:
-        vacuna.x += velocidad # Mover vacuna a la derecha
-        vacuna.x %= XMAX # Restringir la posición a los límites del mundo
-    elif angulo == 90:
-        vacuna.y += velocidad
-        vacuna.y %= YMAX
-    elif angulo == 45:
-        vacuna.x += velocidad
-        vacuna.x %= XMAX
-        vacuna.y += velocidad
-        vacuna.y %= YMAX
+    """Generación de una política de vacunación según el ángulo y velocidad que se defina.
+
+    Parámetros
+    ----------
+    vacuna : Vacuna
+        Vacuna que se utilizará
+    angulo : float
+        Ángulo en el que se moverá la vacuna
+    velocidad : int
+        Velocidad de la vacuna
+    """
+    # Cálculo de la dirección de la vacuna
+    mov_x = velocidad * cos(pi * angulo / 180)
+    mov_y = velocidad * sin(pi * angulo / 180)
+    # Se realiza el movimiento en ambos ejes
+    vacuna.x += mov_x
+    vacuna.y += mov_y
+    # Condiciones del mundo y correcciones por tamaño de la imagen
+    vacuna.x %= ANCHO - 12
+    vacuna.y %= ALTO - 12
 
 # Función principal #
 def main():
@@ -224,13 +235,13 @@ def main():
     poblacion = 100
     # Vacunas disponible en el juego
     vacunas = 1
-    # Dias de simulacion
+    # Dias de simulacion (considera 12 horas)
     dias_simulacion = 2000
     # Tamaño del "mundo" en plano cartesiano
     x_min = 0
     x_max = ANCHO - 12 # Ancho del juego - corrección tamaño de persona
     y_min = 0
-    y_max = ALTO - 5
+    y_max = ALTO - 5 # Alto del juego - corrección tamaño de persona
     # Porcentaje inicial de infectados
     porcentaje_infectados = 0.25
     # Probabilidad de que una persona se vacune
@@ -245,6 +256,8 @@ def main():
     umb_col = vel_per + 1
     # Umbral contagio
     umb_con = vel_per + 5
+    # Umbral vacuna
+    umb_vac = vel_vac + 5
     # Objeto de simulación
     sim = Simulacion(poblacion, vacunas, dias_simulacion, x_min, x_max, y_min, y_max, 
         porc_infectados=porcentaje_infectados, prob_vacuna=probabilidad_vacuna, prob_reb=probabilidad_rebrote)
@@ -275,12 +288,12 @@ def main():
         # Etapas de simulación #
         sim.mover_personas(vel_per, umb_col) # Movimiento aleatorio de personas
         sim.revisar_contagio(umb_con) # Simular el contagio
-        sim.revisar_vacunacion() # Simular el proceso de vacunación
+        sim.revisar_vacunacion(umb_vac) # Simular el proceso de vacunación
         sim.estadisticas() # Obtención de estadísticas
         plot(DISPLAY, sim.personas, sim.vacunas) # Dibujar a los agentes
         d += 1 # Siguientes 12 horas de simulación
 
-        # Detener la simulación cuando se alcancel los días definidos o ya estén todos recuperados
+        # Detener la simulación cuando se alcancen los días definidos o ya estén todos recuperados
         if d == sim.dias_simulacion or sim.recuperados[-1] == sim.poblacion: 
             game_over = True
 
@@ -288,6 +301,6 @@ def main():
         pygame.display.update() 
         FPSCLOCK.tick(FPS) 
 
-# Función principal #
+# LLamado a función principal #
 if __name__ == '__main__':
     main()
