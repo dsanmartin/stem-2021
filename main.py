@@ -125,6 +125,7 @@ def dibujar_baldosas(display):
     fil = ALTO // PIX + 1 # Número de filas
     col = ANCHO // PIX # Número de columnas
     posy = 0
+    # Dibujar las baldosas en el área de juego
     for i in range(fil):
         posx = 0
         for j in range(col):
@@ -191,6 +192,7 @@ def contador(display, sim, d):
     display.blit(label, (XMAX + 42, YMIN + 56))
     label = font_2.render("Vacunados " + str(n_vacun), 1, NEGRO)
     display.blit(label, (XMAX + 42, YMIN + 76))
+    # Días de simulación
     label = font_2.render("Día: " + str(d / 2), 1, NEGRO)
     display.blit(label, (XMAX + 42, YMIN + 100))
 
@@ -231,6 +233,8 @@ def main():
     umb_col = vel_per + 1
     # Umbral contagio
     umb_con = vel_per + 5
+    # Umbral vacuna
+    umb_vac = vel_vac + 5
     # Objeto de simulación
     sim = Simulacion(poblacion, vacunas, dias_simulacion, x_min, x_max, y_min, y_max, 
         porc_infectados=porcentaje_infectados, prob_vacuna=probabilidad_vacuna, prob_reb=probabilidad_rebrote)
@@ -260,8 +264,10 @@ def main():
             # Mover la vacuna utilizando el mouse
             if event.type == MOUSEBUTTONUP:
                 mousex, mousey = event.pos
-                sim.vacunas[0].x = mousex - XMIN
-                sim.vacunas[0].y = YMAX - mousey
+                # Validar que el clic se realice en el área de juego
+                if mousex >= XMIN and mousex <= XMAX and mousey >= YMIN and mousey <= YMAX:
+                    sim.vacunas[0].x = mousex - XMIN
+                    sim.vacunas[0].y = YMAX - mousey
             # Mover vacuna utilizando el teclado
             elif event.type == KEYDOWN:
                 if event.key == pygame.K_LEFT: # Tecla izquierda
@@ -280,12 +286,12 @@ def main():
         # Etapas de simulación #
         sim.mover_personas(vel_per, umb_col) # Movimiento aleatorio de personas
         sim.revisar_contagio(umb_con) # Simular el contagio
-        sim.revisar_vacunacion() # Simular el proceso de vacunación
+        sim.revisar_vacunacion(umb_vac) # Simular el proceso de vacunación
         sim.estadisticas() # Obtención de estadísticas
         plot(DISPLAY, sim.personas, sim.vacunas) # Dibujar a los agentes
         d += 1 # Siguientes 12 horas de simulación
 
-        # Detener la simulación cuando se alcancel los días definidos o ya estén todos recuperados
+        # Detener la simulación cuando se alcancen los días definidos o ya estén todos recuperados
         if d == sim.dias_simulacion or sim.recuperados[-1] == sim.poblacion: 
             game_over = True
 
@@ -293,6 +299,6 @@ def main():
         pygame.display.update() 
         FPSCLOCK.tick(FPS) 
 
-# Función principal #
+# Llamado a función principal #
 if __name__ == '__main__':
     main()

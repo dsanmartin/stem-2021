@@ -33,11 +33,11 @@ class Simulacion:
         y_max : int
             Frontera superior del dominio
         porc_infectados : float, opcional
-            Porcentaje inicial de infectads, por omisión 0.1
+            Porcentaje inicial de infectads, por omisión 10%
         prob_vacuna : float, opcional
-            Probabilidad de que una persona se vacune, por omisión 0.5
+            Probabilidad de que una persona se vacune, por omisión 50%
         prob_reb : float, opcional
-            Probabilidad de rebrote, por omisión 0.5
+            Probabilidad de rebrote, por omisión 50%
         """
         self.poblacion = poblacion
         self.dias_simulacion = dias_simulacion
