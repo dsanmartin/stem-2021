@@ -88,7 +88,6 @@ class Simulacion:
             # Agregamos a la lista
             self.vacunas.append(vac)
 
-
     def mostrar_personas(self):
         """Mostrar informacion de personas"""
         for persona in self.personas:
@@ -168,7 +167,6 @@ class Simulacion:
             vacuna.x %= self.x_max
             vacuna.y %= self.y_max
 
-
     def revisar_contagio(self, umbral=10.0):
         """Simular el contagio de personas.
 
@@ -215,7 +213,7 @@ class Simulacion:
                 if distancia(x1, y1, x2, y2) <= umbral and persona.inoculacion == 0 and uniform(0, 1) <= self.prob_vacuna:
                     persona.inoculacion += vacuna.efectividad
 
-    def rebrote(self, porc=0.05):
+    def rebrote(self, porc=0.02):
         """Simular rebrote de virus
         
         Parametros
@@ -223,13 +221,13 @@ class Simulacion:
         porc : double, opcional
             Porcentaje de rebrote, por omisión 5%
         """
-        for persona in self.personas: # Iterar sobre personas
-            # Revisar probabilidad de rebrote y si la persona es sana
-            if uniform(0, 1) <= porc and persona.estado == 0: 
+        k = 0
+        for persona in self.personas:
+            if persona.estado == 0 and persona.inoculacion == 0 and k < self.poblacion * porc:
                 persona.estado = 1 # Infectado
                 persona.dias_enfermo = randint(28, 50) # Nuevos días enfermo
+                k += 1
 
-    
     def estadisticas(self):
         """Obtención de estadísticas y actualización de estados"""
         # Contadores
