@@ -150,8 +150,6 @@ class Simulacion:
             # Se cierra el ciclo para seguir la ejecución del programa principal
             break 
 
-        #return True
-
 
     def mover_vacunas(self, vel=5):
         """Simulación de movimiento de las vacunas
@@ -199,6 +197,7 @@ class Simulacion:
                         if uniform(0, 1) <= 1 - self.personas[i].inoculacion:
                             self.personas[i].estado = 1 # Cambio a estado infectado
 
+
     def revisar_vacunacion(self, umbral=10.0):
         """Simular el proceso de vacunación.
 
@@ -218,7 +217,7 @@ class Simulacion:
                 if distancia(x1, y1, x2, y2) <= umbral and persona.inoculacion == 0 and uniform(0, 1) <= self.prob_vacuna:
                     persona.inoculacion += vacuna.efectividad
 
-    def rebrote(self, porc=0.05):
+    def rebrote(self, porc=0.02):
         """Simular rebrote de virus
         
         Parametros
@@ -226,12 +225,12 @@ class Simulacion:
         porc : double, opcional
             Porcentaje de rebrote, por omisión 5%
         """
-        for persona in self.personas: # Iterar sobre personas
-            # Revisar probabilidad de rebrote y la persona es sana
-            if uniform(0, 1) <= porc and persona.estado == 0: 
+        k = 0
+        for persona in self.personas:
+            if persona.estado == 0 and persona.inoculacion == 0 and k < self.poblacion * porc:
                 persona.estado = 1 # Infectado
                 persona.dias_enfermo = randint(28, 50) # Nuevos días enfermo
-
+                k += 1
     
     def estadisticas(self):
         """Obtención de estadísticas y actualización de estados"""
