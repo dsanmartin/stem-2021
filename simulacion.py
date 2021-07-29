@@ -88,7 +88,6 @@ class Simulacion:
             # Agregamos a la lista
             self.vacunas.append(vac)
 
-
     def mostrar_personas(self):
         """Mostrar informacion de personas"""
         for persona in self.personas:
@@ -150,7 +149,6 @@ class Simulacion:
             # Se cierra el ciclo para seguir la ejecución del programa principal
             break 
 
-
     def mover_vacunas(self, vel=5):
         """Simulación de movimiento de las vacunas
 
@@ -168,7 +166,6 @@ class Simulacion:
             # Condiciones periodicas
             vacuna.x %= self.x_max
             vacuna.y %= self.y_max
-
 
     def revisar_contagio(self, umbral=10.0):
         """Simular el contagio de personas.
@@ -197,14 +194,13 @@ class Simulacion:
                         if uniform(0, 1) <= 1 - self.personas[i].inoculacion:
                             self.personas[i].estado = 1 # Cambio a estado infectado
 
-
     def revisar_vacunacion(self, umbral=10.0):
         """Simular el proceso de vacunación.
 
         Parámetros
         ----------
         umbral : double, optional
-            Distancia umbral para vacunación, por omisión 1.0
+            Distancia umbral para vacunación, por omisión 10.0
         """
         for persona in self.personas:
             for vacuna in self.vacunas:
