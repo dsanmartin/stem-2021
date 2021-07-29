@@ -19,7 +19,7 @@ PIX = 32 # Pixeles baldosas
 N_BALD_X = 25 # Número baldosas eje x
 N_BALD_Y = 15 # Número baldosas eje y
 
-# Area de juego#
+# Area de juego #
 XMIN = 20 
 XMAX = PIX * N_BALD_X + XMIN
 YMIN = 20
@@ -154,7 +154,7 @@ def plot(display, personas, vacunas):
     for vacuna in vacunas:
         dibujar_vacuna(display, pos(vacuna.x, vacuna.y))
 
-def contador(display, sim):
+def contador(display, sim, d):
     """Generar el contador con estadísticas
 
     Parámetros
@@ -191,6 +191,8 @@ def contador(display, sim):
     display.blit(label, (XMAX + 42, YMIN + 56))
     label = font_2.render("Vacunados " + str(n_vacun), 1, NEGRO)
     display.blit(label, (XMAX + 42, YMIN + 76))
+    label = font_2.render("Día: " + str(d / 2), 1, NEGRO)
+    display.blit(label, (XMAX + 42, YMIN + 100))
 
 # Función principal #
 def main():
@@ -209,16 +211,18 @@ def main():
     # Vacunas disponible en el juego
     vacunas = 1
     # Dias de simulacion
-    dias_simulacion = 100
+    dias_simulacion = 2000
     # Tamaño del "mundo" en plano cartesiano
     x_min = 0
     x_max = ANCHO - 12 # Ancho del juego - corrección tamaño de persona
     y_min = 0
     y_max = ALTO - 5
     # Porcentaje inicial de infectados
-    porcentaje_infectados = 0.5
+    porcentaje_infectados = 0.25
     # Probabilidad de que una persona se vacune
     probabilidad_vacuna = 1
+    # Probabilidad de rebrote
+    probabilidad_rebrote = 0.5
     # Velocidad de movimiento personas (pixeles / tick)
     vel_per = 10
     # Velocidad de movimiento vacunas (pixeles / tick)
@@ -226,11 +230,11 @@ def main():
     # Umbral colision
     umb_col = vel_per + 1
     # Umbral contagio
-    umb_con = 10.0
+    umb_con = vel_per + 5
     # Objeto de simulación
     sim = Simulacion(poblacion, vacunas, dias_simulacion, x_min, x_max, y_min, y_max, 
-        porc_infectados=porcentaje_infectados, prob_vacuna=probabilidad_vacuna)
-    # Dia de simulacion
+        porc_infectados=porcentaje_infectados, prob_vacuna=probabilidad_vacuna, prob_reb=probabilidad_rebrote)
+    # 12 horas de simulacion
     d = 0 
     # Posicion inicial vacuna 
     sim.vacunas[0].x = x_max // 2
@@ -246,7 +250,7 @@ def main():
         dibujar_baldosas(DISPLAY)
 
         # Contador estadísticas
-        contador(DISPLAY, sim)
+        contador(DISPLAY, sim, d)
 
         # Revisar si se cierra el juego #
         revisar_final()
@@ -273,13 +277,13 @@ def main():
                     sim.vacunas[0].y -= vel_vac # Mover vacuna abajo
                     sim.vacunas[0].y %= sim.y_max # Restringir la posición a los límites del mundo
 
-        # Etapas de simulacion #
+        # Etapas de simulación #
         sim.mover_personas(vel_per, umb_col) # Movimiento aleatorio de personas
         sim.revisar_contagio(umb_con) # Simular el contagio
         sim.revisar_vacunacion() # Simular el proceso de vacunación
         sim.estadisticas() # Obtención de estadísticas
         plot(DISPLAY, sim.personas, sim.vacunas) # Dibujar a los agentes
-        d += 1 # Siguiente dia de simulación
+        d += 1 # Siguientes 12 horas de simulación
 
         # Detener la simulación cuando se alcancel los días definidos o ya estén todos recuperados
         if d == sim.dias_simulacion or sim.recuperados[-1] == sim.poblacion: 

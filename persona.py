@@ -1,11 +1,13 @@
-from random import randint
+from random import randint, seed
+
+# Semilla para la generacion de numeros aleatorios
+seed(12345)
 
 class Persona:
-    """Clase para representar a una persona
-    """
+    """Clase para representar a una persona"""
 
     def __init__(self, x, y, estado, vacuna):
-        """ Constructor Persona
+        """Constructor Persona
         
         Parámetros
         ----------
@@ -25,7 +27,7 @@ class Persona:
         self.y = y
         self.estado = estado
         self.vacuna = vacuna
-        self.dias_enfermo = randint(14, 25) # Duracion enfemerdad entre 14 y 25 dias
+        self.dias_enfermo = randint(28, 50) # Duracion enfemerdad entre 14 y 25 dias
         self.inoculacion = 0 # Porcentaje de inoculacion de persona
 
     def mostrar_persona(self):

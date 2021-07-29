@@ -1,22 +1,19 @@
 from persona import Persona
 from vacuna import Vacuna
-from random import randint, uniform
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
+from random import randint, uniform, seed
 
-# Colores para estados de personas
-COLORES = ['green', 'red', 'blue']
+# Semilla para la generacion de numeros aleatorios
+seed(12345)
 
 # Funcion de distancia
 def distancia(x1, y1, x2, y2):
     return ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
 
 class Simulacion:
-    """
-    Clase para controlar la simulación
-    """
+    """Clase para controlar la simulación"""
+
     def __init__(self, poblacion, vacunas, dias_simulacion, x_min, x_max, y_min, y_max, 
-        porc_infectados=0.1, prob_vacuna=0.5):
+        porc_infectados=0.1, prob_vacuna=0.5, prob_reb=0.5):
         """Constructor de la simulación
 
         Parámetros
@@ -39,6 +36,8 @@ class Simulacion:
             Porcentaje inicial de infectads, por omisión 0.1
         prob_vacuna : float, opcional
             Probabilidad de que una persona se vacune, por omisión 0.5
+        prob_reb : float, opcional
+            Probabilidad de rebrote, por omisión 0.5
         """
         self.poblacion = poblacion
         self.dias_simulacion = dias_simulacion
@@ -48,6 +47,7 @@ class Simulacion:
         self.y_max = y_max
         self.porc_infectados = porc_infectados
         self.prob_vacuna = prob_vacuna # Probabilidad que una persona se vacune 
+        self.prob_reb = prob_reb # Probabilidad de rebrote
         self.personas = [] # Lista para guardar a las personas 
         self.vacunas = [] # Lista para guardar a las vacunas
         self.infectados = [] # Lista para guardar número de infectados por dia
@@ -90,8 +90,7 @@ class Simulacion:
 
 
     def mostrar_personas(self):
-        """Mostrar informacion de personas
-        """
+        """Mostrar informacion de personas"""
         for persona in self.personas:
             persona.mostrar_persona()
 
@@ -126,15 +125,6 @@ class Simulacion:
             Distancia de movimiento, por omisión 5
         """
         # Movimiento aleatorio de cada persona
-        # for persona in self.personas:
-        #     # Movimiento aleatorio 
-        #     persona.x += randint(-vel, vel)
-        #     persona.y += randint(-vel, vel)
-
-        #     # Condiciones periodicas
-        #     persona.x %= self.x_max
-        #     persona.y %= self.y_max
-
         # Este while permite que el programa principal espere que la función se termine de ejecutar
         while True:
             for persona in self.personas:
@@ -228,108 +218,49 @@ class Simulacion:
                 if distancia(x1, y1, x2, y2) <= umbral and persona.inoculacion == 0 and uniform(0, 1) <= self.prob_vacuna:
                     persona.inoculacion += vacuna.efectividad
 
-    def estadisticas(self):
-        """Obtención de estadísticas y actualización de estados
+    def rebrote(self, porc=0.05):
+        """Simular rebrote de virus
+        
+        Parametros
+        ----------
+        porc : double, opcional
+            Porcentaje de rebrote, por omisión 5%
         """
+        for persona in self.personas: # Iterar sobre personas
+            # Revisar probabilidad de rebrote y la persona es sana
+            if uniform(0, 1) <= porc and persona.estado == 0: 
+                persona.estado = 1 # Infectado
+                persona.dias_enfermo = randint(28, 50) # Nuevos días enfermo
+
+    
+    def estadisticas(self):
+        """Obtención de estadísticas y actualización de estados"""
+        # Contadores
+        sanos = 0
         infectados = 0
         recuperados = 0
         inoculados = 0
         for persona in self.personas:
             # Revisar estado de personas
-            if persona.estado == 1:
+            if persona.estado == 0: # Sano
+                sanos += 1
+            elif persona.estado == 1: # Infectado
                 infectados += 1
                 if persona.dias_enfermo > 0:
                     persona.dias_enfermo -= 1
-                    if persona.dias_enfermo == 0:
-                        persona.estado = 2
-            elif persona.estado == 2:
+                    if persona.dias_enfermo == 0: # Si ya terminó los días enfermos
+                        persona.estado = 2 # Recuperado
+            elif persona.estado == 2: # Recuperado
                 recuperados += 1
-            
             # Si la persona tiene vacuna
             if persona.inoculacion > 0:
                 inoculados += 1
-        # Cálculo de personas sanas
-        sanos = self.poblacion - infectados - recuperados
         # Agregar estadisticas
         self.infectados.append(infectados)
         self.sanos.append(sanos)
         self.recuperados.append(recuperados)
         self.inoculados.append(inoculados)
-
-    def plot(self):
-        """Gráfico de movimientos y estadísticas
-        """
-        # Estructuras para personas
-        colores = []
-        coors_x_per = []
-        coors_y_per = []
-        # Estructura para vacunas
-        coors_x_vac = []
-        coors_y_vac = []
-        # Información de personas
-        for persona in self.personas:
-            # Pintamos cyan las personas que no estén infectas e inoculadas
-            if persona.inoculacion > 0 and persona.estado != 1:
-                colores.append('cyan')
-            else: # Pintamos según su estado
-                colores.append(COLORES[persona.estado])
-            coors_x_per.append(persona.x)
-            coors_y_per.append(persona.y)
-        # Información de vaunas
-        for vacuna in self.vacunas:
-            coors_x_vac.append(vacuna.x)
-            coors_y_vac.append(vacuna.y)
-
-        fig = plt.figure(figsize=(12, 4))
-
-        # Gráfico izquierdo. Personas y vacunas
-        ax1 = fig.add_subplot(121)
-        ax1.scatter(coors_x_per, coors_y_per, c=colores, label=colores)
-        ax1.scatter(coors_x_vac, coors_y_vac, c='orange', marker='X')
-        ax1.set_xlim([self.x_min, self.x_max])
-        ax1.set_ylim([self.y_min, self.y_max])
-        
-        # Leyenda de scatter
-        handles_ = [
-            mpatches.Patch(color='green', label='Sano'),
-            mpatches.Patch(color='red', label='Infectado'),
-            mpatches.Patch(color='blue', label='Recuperado'),
-            mpatches.Patch(color='cyan', label='Vacunado'),
-            mpatches.Patch(color='orange', label='Vacuna')
-        ]
-        ax1.legend(handles=handles_, loc='upper right', bbox_to_anchor=(1.1, 1.1), fancybox=True)
-
-        # Gráfico derecho. Estadísticas
-        ax2 = fig.add_subplot(122)
-        ax2.set_title("Infectados: " + str(self.infectados[-1]) + " - Sanos: " + str(self.sanos[-1]) + 
-            " - Recuperados: " + str(self.recuperados[-1]) + " - Inoculados: " + str(self.inoculados[-1]))
-        t = list(range(len(self.infectados)))
-        ax2.plot(t, self.infectados, 'r-x', label="Infectados")
-        ax2.plot(t, self.sanos, 'g-o', label="Sanos")
-        ax2.plot(t, self.recuperados, 'b-d', label="Recuperados")
-        ax2.plot(t, self.inoculados, 'c-s', label="Inoculados")
-        ax2.set_xlabel("t")
-        ax2.set_ylabel("#")
-        ax2.legend(loc='upper left', fancybox=True)
-        plt.show()
-
-    def ejecutar(self):
-        """Ejecutar la simulación.
-        """
-        d = 0 # Contador de dias
-        while d <= self.dias_simulacion:
-            self.mover_personas()
-            self.revisar_contagio()
-            self.mover_vacunas()
-            self.revisar_vacunacion()
-            self.estadisticas()
-            self.plot()
-            d += 1
-            # Detener la simulación cuando ya estén todos recuperados
-            if self.recuperados[-1] == self.poblacion: 
-                d = self.dias_simulacion + 1
-
-
-
-    
+        # Rebrote
+        if infectados == 0 and uniform(0, 1) <= self.prob_reb:
+            self.rebrote()
 
