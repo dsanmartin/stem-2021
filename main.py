@@ -297,7 +297,6 @@ def main():
             sim.revisar_contagio(umb_con) # Simular el contagio
             sim.revisar_vacunacion(umb_vac) # Simular el proceso de vacunación
             sim.estadisticas() # Obtención de estadísticas
-            #plot(DISPLAY, sim.personas, sim.vacunas) # Dibujar a los agentes
             d += 1 # Siguientes 12 horas de simulación
         elif sim.sanos == 0 and sim.infectados == 0: # Detener simulación cuando no queden sanos ni infectados
             final(DISPLAY, 1)
