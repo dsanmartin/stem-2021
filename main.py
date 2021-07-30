@@ -294,15 +294,13 @@ def main():
         # Revisar si se cierra el juego #
         revisar_final()
 
-        # Política de vacunación #
-        politica_vacunacion(sim.vacunas[0], alfa, vel_vac)
-
         if d < sim.dias_simulacion: # Verificar dias de simulación
             # Etapas de simulación #
             sim.mover_personas(vel_per, umb_col) # Movimiento aleatorio de personas
             sim.revisar_contagio(umb_con) # Simular el contagio
             sim.revisar_vacunacion(umb_vac) # Simular el proceso de vacunación
             sim.estadisticas() # Obtención de estadísticas
+            politica_vacunacion(sim.vacunas[0], alfa, vel_vac) # Política de vacunación
             d += 1 # Siguientes 12 horas de simulación
         elif sim.sanos == 0 and sim.infectados == 0: # Detener simulación cuando no queden sanos ni infectados
             final(DISPLAY, 1)
